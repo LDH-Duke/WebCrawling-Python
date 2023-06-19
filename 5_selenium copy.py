@@ -7,7 +7,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-
+from bs4 import BeautifulSoup
 
 # 브라우저 꺼짐 방지
 chrome_options = Options()
@@ -21,28 +21,24 @@ browser = webdriver.Chrome(service=service, options=chrome_options)
 
 
 # 1. 네이버 이름
-browser.get("http://www.naver.com")
-time.sleep(2)
+browser.get("https://blog.naver.com/hsyf221/223101879596")
+# https://blog.naver.com/hyoeth/222993153713
+# https://search.naver.com/search.naver?query=%EC%B9%B4%ED%8E%98%20%EB%A6%AC%EB%B7%B0&nso=&where=blog&sm=tab_opt
+content = browser.find_element(By.TAG_NAME, "iframe")
+# print(content)
+
+browser.switch_to.frame(content)
+
+r = browser.page_source
 
 
-# 2. 로그인 버튼 클릭
-user_id = "ehdgml506"
-user_pw = "ckrdlckrdl159!!"
+soup = BeautifulSoup(r, "html.parser")
 
-elem = browser.find_element(By.CLASS_NAME, "link_login")
-elem.click()
+# border = soup.select('#postListBody')
+# border = soup.find(id='postListBody')
+# print(border)
+# a = border.find_all("div", attrs={"class": "se-module se-module-text"})
+a = soup.find_all("div", attrs={"class": "se-module se-module-text"})
 
-# 3. id, pw 입력
-login_id = browser.find_element(By.ID, "id")
-login_id.click()
-pyperclip.copy(user_id)
-login_id.send_keys(Keys.CONTROL, 'v')
-
-login_pw = browser.find_element(By.ID, "pw")
-login_pw.click()
-pyperclip.copy(user_pw)
-login_pw.send_keys(Keys.CONTROL, 'v')
-
-# 4. 로그인 버튼 클릭 후 브라우저 등록 버튼 클릭
-browser.find_element(By.ID, 'log.login').click()
-browser.find_element(By.ID, "new.save").click()
+for i in a:
+    print(i.get_text())
