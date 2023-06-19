@@ -31,32 +31,45 @@ browser = webdriver.Chrome(service=service, options=chrome_options)
 # https://blog.naver.com/hyoeth/222993153713
 
 
-def find_url():  # 크롤링 블로그 url 추출 함수
+def find_url(input):  # 크롤링 블로그 url 추출 함수
     # 네이버 접속
-    browser.get(
-        'https://auto.danawa.com/auto/?Work=record&Tab=Model&Month=2022-05-00&MonthTo=2023-05-00')
+    browser.get('http://www.naver.com')
     browser.implicitly_wait(10)
+
+    # 검색탭 클릭 후 입력
+    search = browser.find_element(By.CSS_SELECTOR, "input#query.search_input")
+    search.click()
+    search.send_keys(input)
+    search.send_keys(Keys.ENTER)
+    browser.implicitly_wait(10)
+
+    # VIEW탭으로 이동 후 블로그 카테고리 선택
+    browser.find_element(By.LINK_TEXT, "VIEW").click()
+    browser.implicitly_wait(10)
+    browser.find_element(By.LINK_TEXT, "블로그").click()
+    browser.implicitly_wait(10)
+
     # 스크롤 처리
     # bf_sc = browser.execute_script("return window.scrollY")
-    # cur_height = browser.execute_script("return document.body.scrollHeight")
-    # print(cur_height)
-    # while True:
-    #     browser.find_element(By.CSS_SELECTOR, "body").send_keys(Keys.END)
+    cur_height = browser.execute_script("return document.body.scrollHeight")
+    print(cur_height)
+    while True:
+        browser.find_element(By.CSS_SELECTOR, "body").send_keys(Keys.END)
 
-    #     # update_height = browser.execute_script("return document.body.scrollHeight")
-    #     time.sleep(2)
+        update_height = browser.execute_script(
+            "return document.body.scrollHeight")
+        time.sleep(2)
+        browser.implicitly_wait(10)
 
-    #     at_sc = browser.execute_script("return window.scrollY")
+        if update_height > 130000:
+            print(update_height)
+            break
 
-    #     if at_sc == bf_sc:
-    #         break
-    #     else:
-    #         bf_sc = at_sc
-
+    browser.implicitly_wait(10)
     # 반복문으로 n개 url 값 list에 저장 후 리턴
     url_list = []
-    for i in range(100):
-        link_selector = f"main > table.recordTable model > tbody > tr > td > a"
+    for i in range(701, 1001):
+        link_selector = f"div._more_contents_event_base > ul > li#sp_blog_{i} > div > a"
         link = browser.find_element(By.CSS_SELECTOR, link_selector)
 
         url_list.append(link.get_attribute("href"))
@@ -65,8 +78,7 @@ def find_url():  # 크롤링 블로그 url 추출 함수
 
 
 search = '카페 리뷰'
-url_list = find_url()
-print(url_list)
+url_list = find_url(search)
 # print(url_list, len(url_list))
 
 text = ''
